@@ -1,0 +1,164 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.container {
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.message h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.photo {
+    margin: 20px 0;
+}
+
+.photo-img {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Tombol untuk navigasi dan aksi */
+.next-button, .accept-button, .decline-button {
+    display: inline-block;
+    background-color: #ff1493;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.8);
+}
+
+/* Efek hover untuk tombol */
+.next-button:hover, .accept-button:hover {
+    background-color: #ff69b4;
+}
+
+/* Tombol tidak dengan warna merah */
+.decline-button {
+    background-color: #ff6347;
+    margin-left: 20px;
+}
+
+/* Tata letak tombol-tombol (Ya/Tidak) */
+.choices {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Beri jarak antar tombol */
+}
+
+/* Efek fade-in untuk konten */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Efek slide-in dari kanan */
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.slide-in {
+    animation: slideIn 0.8s ease-in-out;
+}
+
+/* Animasi bunga-bunga */
+.flower-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.flower-animation::before, .flower-animation::after {
+    content: '';
+    position: absolute;
+    background-image: url('https://path-to-your-flower-image.png');
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    animation: moveFlowers 15s linear infinite;
+}
+
+.flower-animation::before {
+    top: -50px;
+    left: 0;
+}
+
+.flower-animation::after {
+    top: -50px;
+    right: 0;
+}
+
+/* Animasi pergerakan bunga */
+@keyframes moveFlowers {
+    0% { transform: translateY(-50px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* Responsivitas untuk layar lebih kecil */
+@media (max-width: 768px) {
+    .message h1 {
+        font-size: 1.5em;
+    }
+
+    .next-button, .accept-button, .decline-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .photo-img {
+        max-width: 200px;
+    }
+}
+
+/* Gaya untuk input teks */
+input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    margin-top: 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 2px solid #ff69b4;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.6);
+    text-align: center;
+    color: #333;
+}
+
+input[type="text"]::placeholder {
+    color: #999;
+}
+
+/* Fokus pada input teks */
+input[type="text"]:focus {
+    border-color: #ff1493;
+    outline: none;
+}
+
+/* Gaya untuk form */
+form {
+    margin-top: 20px;
+}

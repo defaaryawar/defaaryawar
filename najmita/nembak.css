@@ -1,0 +1,74 @@
+/* Gaya untuk kontainer utama */
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Gaya untuk pesan pertanyaan */
+.message {
+    margin-bottom: 20px;
+}
+
+.message h1 {
+    font-size: 1.5em;
+}
+
+/* Kontainer untuk tombol */
+.choices {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 20px;
+    width: 80%; /* Buat lebar relatif terhadap ukuran layar */
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+/* Tombol Ya dan Tidak */
+.accept-button, .decline-button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Gaya untuk tombol "Ya" */
+.accept-button {
+    background-color: #ff69b4;
+    color: white;
+}
+
+/* Gaya untuk tombol "Tidak" */
+.decline-button {
+    background-color: #ff6347;
+    color: white;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+/* Tambahkan kelas moveable untuk tombol yang bisa dipindah */
+.decline-button.moveable {
+    position: absolute;
+}
+
+/* Animasi masuk untuk pesan */
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slide-in 0.5s forwards;
+}
