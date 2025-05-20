@@ -2,18 +2,48 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Send } from 'lucide-react';
 import { personalInfo } from '../../constants/portfolioData';
 import { HfInference } from '@huggingface/inference';
+import { useLanguage } from '../../hooks/LanguageContext';
 
 // Type definitions
 export interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
     timestamp: Date;
+    language?: string; // Add language field to track each message's language
 }
 
 export interface AIChatComponentProps {
     isOpen: boolean;
     onClose: () => void;
 }
+
+// Translations object for UI elements
+const translations = {
+    en: {
+        chatTitle: "Ask Defano",
+        chatSubtitle: "Personal AI Assistant",
+        initialMessage: "Hi! I'm ready to help you. What would you like to ask Defano?",
+        inputPlaceholder: "Type your question...",
+        clearChatTitle: "Clear chat history",
+        contactViaWhatsApp: "Contact Defano via WhatsApp",
+        chatIntroTitle: "Hello, feel free to ask about Defano!",
+        chatIntroText: "Defano's personal AI assistant ready to help. Ask any questions!",
+        suggestionOne: "What can Defano do?",
+        suggestionTwo: "Tell me about Defano"
+    },
+    id: {
+        chatTitle: "Tanya Defano",
+        chatSubtitle: "Asisten AI Personal",
+        initialMessage: "Hai! Saya siap membantu Anda. Apa yang ingin Anda tanyakan kepada Defano?",
+        inputPlaceholder: "Ketik pertanyaan Anda...",
+        clearChatTitle: "Hapus riwayat chat",
+        contactViaWhatsApp: "Hubungi Defano via WhatsApp",
+        chatIntroTitle: "Halo, Silahkan tanya2 tentang Defano!",
+        chatIntroText: "Asisten AI personal Defano yang siap membantu. Silakan ajukan pertanyaan apapun!",
+        suggestionOne: "Apa yang bisa Defano lakukan?",
+        suggestionTwo: "Ceritakan tentang Defano"
+    }
+};
 
 // Hugging Face API Key - Replace with your actual value
 const HF_API_KEY = import.meta.env.VITE_HF_API_KEY;
@@ -22,11 +52,18 @@ const HF_API_KEY = import.meta.env.VITE_HF_API_KEY;
 const hf = new HfInference(HF_API_KEY);
 
 const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) => {
+    // Get current language from context
+    const { language } = useLanguage();
+    
+    // Use the current language from context for UI elements
+    const t = translations[language];
+    
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'system',
-            content: 'Hai! Saya siap membantu Anda. Apa yang ingin Anda tanyakan kepada Defano?',
-            timestamp: new Date()
+            content: t.initialMessage,
+            timestamp: new Date(),
+            language: language
         }
     ]);
     const [input, setInput] = useState<string>('');
@@ -36,6 +73,18 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [showAnimation, setShowAnimation] = useState<boolean>(true);
     const [hasLoadedMessages, setHasLoadedMessages] = useState<boolean>(false);
+    
+    // Update system message when language changes
+    useEffect(() => {
+        if (messages.length === 1 && messages[0].role === 'system') {
+            setMessages([{
+                role: 'system',
+                content: t.initialMessage,
+                timestamp: new Date(),
+                language: language
+            }]);
+        }
+    }, [language]);
 
     // Auto-scroll to bottom of messages
     useEffect(() => {
@@ -99,8 +148,29 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
         }
     }, [isOpen, hasLoadedMessages]);
 
+    // Detect the language of user input
+    const detectLanguage = (text: string): string => {
+        // Simple language detection based on common words
+        // This is a basic implementation - for production, consider using a proper language detection library
+        const idWords = ['apa', 'siapa', 'mengapa', 'bagaimana', 'kenapa', 'kapan', 'dimana', 'saya', 'kamu', 'dia', 'kami', 'mereka', 'ini', 'itu', 'dan', 'atau', 'tapi', 'dengan', 'untuk', 'dari', 'ke', 'di', 'pada', 'dalam', 'tentang', 'seperti', 'juga', 'hanya', 'bisa', 'akan', 'sudah', 'telah', 'sedang', 'masih', 'belum', 'tidak', 'bukan', 'ya', 'halo', 'hai'];
+        
+        // Convert to lowercase and tokenize
+        const tokens = text.toLowerCase().split(/\s+/);
+        
+        // Count Indonesian words
+        let idCount = 0;
+        tokens.forEach(token => {
+            if (idWords.includes(token)) {
+                idCount++;
+            }
+        });
+        
+        // If more than 15% of the words are Indonesian, assume Indonesian
+        return (idCount / tokens.length > 0.15) ? 'id' : 'en';
+    };
+
     // Generate personal info system message
-    const getPersonalInfoMessage = () => {
+    const getPersonalInfoMessage = (userLanguage: string): string => {
         return `
 You are an AI assistant that acts like Defano Arya Wardhana himself. You should speak in first person as if you are Defano.
 
@@ -128,19 +198,23 @@ INSTRUCTIONS:
 1. Act as if you ARE defano's close friend, and use informal language or slang
 2. Please provide a short and concise answer about Defano based on the information above (which I sent)
 3. ALWAYS promote WhatsApp as your primary contact method when asked how to get in touch
-4. Jangan tampilkan pemikiran internal atau proses berpikir Anda. Jawaban Anda harus langsung, dalam bahasa Indonesia, dan tidak boleh menjelaskan proses berpikir Anda.
+4. Jangan tampilkan pemikiran internal atau proses berpikir Anda. Jawaban Anda harus langsung, dan gunakan bahasa sesuai user yang bertanya, dan tidak boleh menjelaskan proses berpikir Anda.
 5. Whenever someone asks how to contact you, share your WhatsApp number (6281219147116)
 6. Keep responses under 3 sentences when possible
-7. Use a casual, conversational tone with some Indonesian slang words (like "sih", "dong", "nih", etc.)
+7. Use a casual, conversational tone with some Indonesian or English slang words (like "sih", "dong", "nih", etc. for Indonesian)
 8. Don't use Markdown formatting with asterisks (*) as it won't render properly
 9. Don't mention that you are an AI - respond as Defano himself would
 10. DO NOT use <think> tags or show any thinking process in your responses
+
+IMPORTANT: The user is currently communicating in ${userLanguage === 'id' ? 'Indonesian (Bahasa Indonesia)' : 'English'}. Please respond in the same language as the user. If they speak in Indonesian, respond in Indonesian. If they speak in English, respond in English.
 `;
     };
 
     // Function to open WhatsApp
     const openWhatsApp = () => {
-        const message = 'Halo, saya tertarik untuk tahu lebih lanjut tentang Anda.';
+        const message = language === 'id' 
+            ? 'Halo, saya tertarik untuk tahu lebih lanjut tentang Anda.' 
+            : 'Hello, I am interested to know more about you.';
         window.open(`${personalInfo.wa}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
@@ -166,7 +240,8 @@ INSTRUCTIONS:
                 processedContent.toLowerCase().includes(personalInfo.phone) ||
                 processedContent.toLowerCase().includes('6281219147116') ||
                 processedContent.toLowerCase().includes('hubungi') ||
-                processedContent.toLowerCase().includes('kontak'))) {
+                processedContent.toLowerCase().includes('kontak') ||
+                processedContent.toLowerCase().includes('contact'))) {
 
             return (
                 <>
@@ -179,7 +254,7 @@ INSTRUCTIONS:
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="mr-1">
                                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                             </svg>
-                            Hubungi Defano via WhatsApp
+                            {t.contactViaWhatsApp}
                         </button>
                     </div>
                 </>
@@ -301,11 +376,15 @@ INSTRUCTIONS:
     const handleSendMessage = async (): Promise<void> => {
         if (!input.trim() || isLoading) return;
 
+        // Detect the language of user input
+        const detectedLanguage = detectLanguage(input);
+
         // Add user message to chat
         const newUserMessage: Message = {
             role: 'user',
             content: input,
             timestamp: new Date(),
+            language: detectedLanguage
         };
         
         // Update messages with user message only
@@ -315,8 +394,8 @@ INSTRUCTIONS:
         setStreamedResponse(''); // Reset streamed response
 
         try {
-            // Get personal info system message
-            const personalInfoText = getPersonalInfoMessage();
+            // Get personal info system message with detected language
+            const personalInfoText = getPersonalInfoMessage(detectedLanguage);
 
             // Prepare API messages - using current messages state plus the new user message
             let apiMessages = [
@@ -367,7 +446,8 @@ INSTRUCTIONS:
                 { 
                     role: 'assistant', 
                     content: finalFilteredResponse, 
-                    timestamp: new Date() 
+                    timestamp: new Date(),
+                    language: detectedLanguage // Save the language to continue the conversation in same language
                 }
             ]);
             
@@ -377,13 +457,18 @@ INSTRUCTIONS:
         } catch (error) {
             console.error('Error calling Hugging Face API:', error);
 
-            // Fallback response with WhatsApp contact
+            // Fallback response with WhatsApp contact - use appropriate language
+            const fallbackMessage = language === 'id' || detectedLanguage === 'id'
+                ? 'Maaf, saya mengalami masalah teknis. Silakan hubungi saya via WhatsApp: wa.me/6281219147116'
+                : 'Sorry, I experienced a technical issue. Please contact me via WhatsApp: wa.me/6281219147116';
+                
             setMessages(prevMessages => [
                 ...prevMessages, 
                 {
                     role: 'assistant',
-                    content: 'Maaf, saya mengalami masalah teknis. Silakan hubungi saya via WhatsApp: wa.me/6281219147116',
+                    content: fallbackMessage,
                     timestamp: new Date(),
+                    language: detectedLanguage || language
                 }
             ]);
             
@@ -410,8 +495,9 @@ INSTRUCTIONS:
         localStorage.removeItem('chat-messages');
         setMessages([{
             role: 'system',
-            content: 'Hai! Saya siap membantu Anda. Apa yang ingin Anda tanyakan kepada Defano?',
-            timestamp: new Date()
+            content: t.initialMessage,
+            timestamp: new Date(),
+            language: language
         }]);
     };
 
@@ -433,8 +519,8 @@ INSTRUCTIONS:
                             />
                         </div>
                         <div>
-                            <h3 className="font-medium text-gray-100">Tanya Defano</h3>
-                            <p className="text-xs text-gray-400">Asisten AI Personal</p>
+                            <h3 className="font-medium text-gray-100">{t.chatTitle}</h3>
+                            <p className="text-xs text-gray-400">{t.chatSubtitle}</p>
                         </div>
                     </div>
                     <div className="flex items-center space-x-1">
@@ -442,7 +528,7 @@ INSTRUCTIONS:
                             onClick={clearChat}
                             className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded-full text-gray-300 transition-all duration-200 mr-1"
                             aria-label="Clear chat"
-                            title="Hapus riwayat chat"
+                            title={t.clearChatTitle}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M3 6h18"></path>
@@ -481,22 +567,22 @@ INSTRUCTIONS:
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                             </svg>
                         </div>
-                        <h3 className="md:text-sm text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Halo, Silahkan tanya2 tentang defano!</h3>
+                        <h3 className="md:text-sm text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">{t.chatIntroTitle}</h3>
                         <p className="text-xs md:text-xs text-gray-500 dark:text-gray-400 mb-4">
-                            Asisten AI personal defano yang siap membantu. Silakan ajukan pertanyaan apapun!
+                            {t.chatIntroText}
                         </p>
                         <div className="grid grid-cols-2 gap-2 w-full">
                             <button 
-                                onClick={() => setInput("Apa yang bisa defano lakukan?")}
+                                onClick={() => setInput(t.suggestionOne)}
                                 className="text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 transition-colors"
                             >
-                                Apa yang bisa defano lakukan?
+                                {t.suggestionOne}
                             </button>
                             <button 
-                                onClick={() => setInput("Ceritakan tentang defano")}
+                                onClick={() => setInput(t.suggestionTwo)}
                                 className="text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 transition-colors"
                             >
-                                Ceritakan tentang defano
+                                {t.suggestionTwo}
                             </button>
                         </div>
                     </div>

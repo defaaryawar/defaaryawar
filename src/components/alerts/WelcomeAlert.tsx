@@ -1,6 +1,6 @@
-// components/WelcomeAlert.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import { X, MessageCircle } from 'lucide-react';
+import { useLanguage } from '../hooks/LanguageContext';
 
 const STORAGE_KEY = 'lastWelcomeAlertTime';
 
@@ -8,17 +8,17 @@ const WelcomeAlert: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) => {
     const [visible, setVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const { language } = useLanguage();
 
     useEffect(() => {
         const lastShown = localStorage.getItem(STORAGE_KEY);
         const now = new Date().getTime();
-        const ONE_HOURS = 1 * 60 * 60 * 1000;
+        const ONE_HOUR = 1 * 60 * 60 * 1000;
 
-        if (!lastShown || now - parseInt(lastShown) > ONE_HOURS) {
+        if (!lastShown || now - parseInt(lastShown) > ONE_HOUR) {
             setVisible(true);
             localStorage.setItem(STORAGE_KEY, now.toString());
 
-            // Auto-hide after 10 seconds
             timerRef.current = setTimeout(() => {
                 handleClose();
             }, 10000);
@@ -38,10 +38,16 @@ const WelcomeAlert: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) => {
         setIsClosing(true);
         setTimeout(() => {
             setVisible(false);
-        }, 100); // Match the duration of the exit animation
+        }, 100);
     };
 
     if (!visible) return null;
+
+    // Texts for both languages
+    const title = language === 'id' ? 'Chat dengan Defano' : 'Chat with Defano';
+    const message = language === 'id'
+        ? 'Kamu bisa tanya Defano lewat asistennya sekarang! Klik logo pesan di kanan bawah ya!'
+        : 'You can now ask Defano anything through his assistant! Just click the message icon at the bottom right.';
 
     return (
         <div
@@ -57,13 +63,8 @@ const WelcomeAlert: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) => {
                 <MessageCircle size={20} className={isDarkMode ? 'text-gray-300' : 'text-gray-800'} />
             </div>
             <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-1">
-                    Chat dengan Defano
-                </h4>
-                <p className="text-xs sm:text-sm opacity-90">
-                    Kamu bisa tanya <strong>Defano</strong> lewat asistennya sekarang!
-                    Klik logo pesan di kanan bawah ya!
-                </p>
+                <h4 className="font-semibold text-sm mb-1">{title}</h4>
+                <p className="text-xs sm:text-sm opacity-90">{message}</p>
             </div>
             <button
                 onClick={handleClose}
