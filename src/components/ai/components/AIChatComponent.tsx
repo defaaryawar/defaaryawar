@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send } from 'lucide-react';
 import { personalInfo } from '../../constants/portfolioData';
+import { HfInference } from '@huggingface/inference';
 
 // Type definitions
 export interface Message {
@@ -14,10 +15,11 @@ export interface AIChatComponentProps {
     onClose: () => void;
 }
 
-// OpenRouter API Key and Site Info - Replace with your actual values
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const SITE_URL = import.meta.env.VITE_SITE_URL2;
-const SITE_NAME = import.meta.env.VITE_SITE_NAME;
+// Hugging Face API Key - Replace with your actual value
+const HF_API_KEY = import.meta.env.VITE_HF_API_KEY;
+
+// Initialize Hugging Face Inference client
+const hf = new HfInference(HF_API_KEY);
 
 const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) => {
     const [messages, setMessages] = useState<Message[]>([
@@ -29,14 +31,16 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
     ]);
     const [input, setInput] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [streamedResponse, setStreamedResponse] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [showAnimation, setShowAnimation] = useState<boolean>(true);
+    const [hasLoadedMessages, setHasLoadedMessages] = useState<boolean>(false);
 
     // Auto-scroll to bottom of messages
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    }, [messages, streamedResponse]);
 
     // Handle textarea auto-resize
     useEffect(() => {
@@ -59,31 +63,41 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
 
     // Store conversation in localStorage
     useEffect(() => {
-        if (typeof window !== 'undefined' && messages.length > 1) {
-            localStorage.setItem('chat-messages', JSON.stringify(messages));
+        if (typeof window !== 'undefined' && messages.length > 1 && !isLoading) {
+            const messagesToStore = messages.map(msg => ({
+                ...msg,
+                timestamp: msg.timestamp.toISOString() // Convert Date to string for proper serialization
+            }));
+            localStorage.setItem('chat-messages', JSON.stringify(messagesToStore));
         }
-    }, [messages]);
+    }, [messages, isLoading]);
 
     // Load conversation from localStorage
     useEffect(() => {
-        if (typeof window !== 'undefined' && isOpen) {
-            const savedMessages = localStorage.getItem('chat-messages');
-
-            if (savedMessages) {
-                try {
+        if (typeof window !== 'undefined' && isOpen && !hasLoadedMessages) {
+            try {
+                const savedMessages = localStorage.getItem('chat-messages');
+                
+                if (savedMessages) {
                     const parsedMessages = JSON.parse(savedMessages);
                     // Convert string dates back to Date objects
-                    const messagesWithDates = parsedMessages.map((msg: any) => ({
+                    const messagesWithDates = parsedMessages.map((msg: { timestamp: string | number | Date; }) => ({
                         ...msg,
                         timestamp: new Date(msg.timestamp)
                     }));
-                    setMessages(messagesWithDates);
-                } catch (e) {
-                    console.error('Error parsing saved messages', e);
+                    
+                    // Only set if we have valid messages
+                    if (messagesWithDates.length > 0) {
+                        setMessages(messagesWithDates);
+                    }
                 }
+            } catch (e) {
+                console.error('Error parsing saved messages', e);
             }
+            
+            setHasLoadedMessages(true);
         }
-    }, [isOpen]);
+    }, [isOpen, hasLoadedMessages]);
 
     // Generate personal info system message
     const getPersonalInfoMessage = () => {
@@ -114,11 +128,13 @@ INSTRUCTIONS:
 1. Act as if you ARE defano's close friend, and use informal language or slang
 2. Please provide a short and concise answer about Defano based on the information above (which I sent)
 3. ALWAYS promote WhatsApp as your primary contact method when asked how to get in touch
-4. Whenever someone asks how to contact you, share your WhatsApp number (6281219147116)
-5. Keep responses under 3 sentences when possible
-6. Use a casual, conversational tone with some Indonesian slang words (like "sih", "dong", "nih", etc.)
-7. Don't use Markdown formatting with asterisks (*) as it won't render properly
-8. Don't mention that you are an AI - respond as Defano himself would
+4. Jangan tampilkan pemikiran internal atau proses berpikir Anda. Jawaban Anda harus langsung, dalam bahasa Indonesia, dan tidak boleh menjelaskan proses berpikir Anda.
+5. Whenever someone asks how to contact you, share your WhatsApp number (6281219147116)
+6. Keep responses under 3 sentences when possible
+7. Use a casual, conversational tone with some Indonesian slang words (like "sih", "dong", "nih", etc.)
+8. Don't use Markdown formatting with asterisks (*) as it won't render properly
+9. Don't mention that you are an AI - respond as Defano himself would
+10. DO NOT use <think> tags or show any thinking process in your responses
 `;
     };
 
@@ -251,8 +267,39 @@ INSTRUCTIONS:
         return <>{processed}</>;
     };
 
+    // Helper function to filter out internal thinking
+    const filterInternalThinking = (text: string): string => {
+        // Check for common thinking patterns and remove them
+        let filtered = text;
+        
+        // Remove content between <think> tags if present
+        filtered = filtered.replace(/<think>[\s\S]*?<\/think>/gi, '');
+        
+        // Remove internal thinking phrases and segments
+        const internalPhrases = [
+            /Okay, the user sent.*?(?=\n\n|\Z)/is,
+            /First, I should.*?(?=\n\n|\Z)/is,
+            /Let me check.*?(?=\n\n|\Z)/is,
+            /Alright, that should do it.*?(?=\n\n|\Z)/is,
+            /Yep, that's covered.*?(?=\n\n|\Z)/is,
+            /Hmm, let me think.*?(?=\n\n|\Z)/is,
+            /As Defano, I should.*?(?=\n\n|\Z)/is,
+            /I need to respond as Defano.*?(?=\n\n|\Z)/is
+        ];
+        
+        // Apply all filters
+        internalPhrases.forEach(phrase => {
+            filtered = filtered.replace(phrase, '');
+        });
+        
+        // Ensure we don't have double line breaks at the start
+        filtered = filtered.replace(/^\n+/, '');
+        
+        return filtered.trim();
+    };
+
     const handleSendMessage = async (): Promise<void> => {
-        if (!input.trim() || isLoading) return; // Tambahkan pengecekan isLoading
+        if (!input.trim() || isLoading) return;
 
         // Add user message to chat
         const newUserMessage: Message = {
@@ -260,113 +307,88 @@ INSTRUCTIONS:
             content: input,
             timestamp: new Date(),
         };
-        const updatedMessages = [...messages, newUserMessage];
-        setMessages(updatedMessages);
+        
+        // Update messages with user message only
+        setMessages(prevMessages => [...prevMessages, newUserMessage]);
         setInput('');
         setIsLoading(true);
+        setStreamedResponse(''); // Reset streamed response
 
         try {
             // Get personal info system message
             const personalInfoText = getPersonalInfoMessage();
 
-            // Prepare API messages
+            // Prepare API messages - using current messages state plus the new user message
             let apiMessages = [
                 {
                     role: 'system',
                     content: personalInfoText
                 },
-                ...updatedMessages.map((msg) => ({
+                ...messages.map((msg) => ({
                     role: msg.role === 'system' ? 'assistant' : msg.role,
                     content: msg.content,
-                }))
+                })),
+                {
+                    role: 'user',
+                    content: newUserMessage.content
+                }
             ];
 
-            // Tambahkan delay minimal 1 detik antara permintaan
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': SITE_URL,
-                    'X-Title': SITE_NAME,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: 'meta-llama/llama-3.3-8b-instruct:free',
-                    stream: true,
-                    messages: apiMessages,
-                }),
+            // Use Hugging Face chat completion with streaming
+            const response = hf.chatCompletionStream({
+                model: 'Qwen/Qwen3-235B-A22B',
+                messages: apiMessages,
+                stream: true
             });
 
-            if (!response.ok) {
-                if (response.status === 429) {
-                    // Jika masih dapat 429, tambahkan delay lebih panjang
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                    throw new Error('Terlalu banyak permintaan. Silakan coba lagi nanti.');
-                }
-                throw new Error(`API error: ${response.status}`);
-            }
-
-            if (!response.body) {
-                throw new Error('ReadableStream not supported in this environment.');
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
             let aiResponse = '';
-            let done = false;
+            
+            for await (const chunk of response) {
+                if (chunk.choices && chunk.choices.length > 0) {
+                    const newContent = chunk.choices[0].delta.content;
 
-            while (!done) {
-                const { value, done: doneReading } = await reader.read();
-                done = doneReading;
-                if (value) {
-                    const chunk = decoder.decode(value, { stream: true });
-                    // Split chunk by newlines
-                    const lines = chunk.split('\n');
-
-                    for (const line of lines) {
-                        const trimmed = line.trim();
-                        if (!trimmed) continue;
-                        if (trimmed === 'data: [DONE]') {
-                            done = true;
-                            break;
-                        }
-                        if (trimmed.startsWith('data: ')) {
-                            const jsonStr = trimmed.substring(6); // remove "data: " prefix
-                            try {
-                                const parsed = JSON.parse(jsonStr);
-                                const delta = parsed.choices?.[0]?.delta;
-                                if (delta && delta.content) {
-                                    aiResponse += delta.content;
-
-                                    // Update state with each new content chunk (partial streaming)
-                                    setMessages(prev => {
-                                        const filtered = prev.filter(m => m.role !== 'assistant');
-                                        return [
-                                            ...filtered,
-                                            { role: 'assistant', content: aiResponse, timestamp: new Date() }
-                                        ];
-                                    });
-                                }
-                            } catch (err) {
-                                console.warn('JSON parse error:', err);
-                            }
-                        }
+                    if (newContent) {
+                        aiResponse += newContent;
+                        
+                        // Filter out any internal thinking patterns before updating
+                        const filteredResponse = filterInternalThinking(aiResponse);
+                        
+                        // Update streamed response state
+                        setStreamedResponse(filteredResponse);
                     }
                 }
             }
-            // Stream finished, final update done in loop
+
+            // Final update with fully filtered content - add as a new message
+            const finalFilteredResponse = filterInternalThinking(aiResponse);
+            
+            setMessages(prevMessages => [
+                ...prevMessages, 
+                { 
+                    role: 'assistant', 
+                    content: finalFilteredResponse, 
+                    timestamp: new Date() 
+                }
+            ]);
+            
+            // Clear streamed response once the full message is added
+            setStreamedResponse('');
 
         } catch (error) {
-            console.error('Error calling AI API:', error);
+            console.error('Error calling Hugging Face API:', error);
 
-            // Fallback response in case of error
-            setMessages([...updatedMessages, {
-                role: 'assistant',
-                content: 'Maaf, saya mengalami masalah teknis. Silakan coba lagi nanti.',
-                timestamp: new Date(),
-            }]);
+            // Fallback response with WhatsApp contact
+            setMessages(prevMessages => [
+                ...prevMessages, 
+                {
+                    role: 'assistant',
+                    content: 'Maaf, saya mengalami masalah teknis. Silakan hubungi saya via WhatsApp: wa.me/6281219147116',
+                    timestamp: new Date(),
+                }
+            ]);
+            
+            setStreamedResponse('');
+            
         } finally {
             setIsLoading(false);
         }
@@ -451,7 +473,36 @@ INSTRUCTIONS:
                     </div>
                 )}
 
-                {!showAnimation && messages.map((msg, index) => (
+                {/* Watermark when no messages */}
+                {!showAnimation && messages.filter(msg => msg.role !== 'system').length === 0 && !streamedResponse && !isLoading && (
+                    <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                        <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 className="md:text-sm text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Halo, Silahkan tanya2 tentang defano!</h3>
+                        <p className="text-xs md:text-xs text-gray-500 dark:text-gray-400 mb-4">
+                            Asisten AI personal defano yang siap membantu. Silakan ajukan pertanyaan apapun!
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 w-full">
+                            <button 
+                                onClick={() => setInput("Apa yang bisa defano lakukan?")}
+                                className="text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 transition-colors"
+                            >
+                                Apa yang bisa defano lakukan?
+                            </button>
+                            <button 
+                                onClick={() => setInput("Ceritakan tentang defano")}
+                                className="text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 py-2 px-3 rounded-lg text-gray-700 dark:text-gray-300 transition-colors"
+                            >
+                                Ceritakan tentang defano
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {!showAnimation && messages.filter(msg => msg.role !== 'system').map((msg, index) => (
                     <div key={index} className={`mb-2 ${msg.role === 'user' ? 'flex flex-col items-end' : 'flex flex-col items-start'} animate-fadeIn`}>
                         <div className={`max-w-3/4 p-2 rounded-lg shadow-sm text-sm ${msg.role === 'user'
                             ? 'bg-gray-700 text-gray-100'
@@ -465,7 +516,20 @@ INSTRUCTIONS:
                     </div>
                 ))}
 
-                {isLoading && (
+                {/* Show streaming response */}
+                {streamedResponse && (
+                    <div className="mb-2 flex flex-col items-start animate-fadeIn">
+                        <div className="max-w-3/4 p-2 rounded-lg shadow-sm text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
+                            {renderMessageContent(streamedResponse, true)}
+                        </div>
+                        <span className="text-xs text-gray-500 mt-1 px-1">
+                            {formatTime(new Date())}
+                        </span>
+                    </div>
+                )}
+
+                {/* Loading animation (only show when no streamed response yet) */}
+                {isLoading && !streamedResponse && (
                     <div className="flex items-start mb-2">
                         <div className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700">
                             <div className="flex space-x-2">
