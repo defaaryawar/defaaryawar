@@ -29,7 +29,6 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
     ]);
     const [input, setInput] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [systemMessageSent, setSystemMessageSent] = useState<boolean>(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [showAnimation, setShowAnimation] = useState<boolean>(true);
@@ -62,16 +61,13 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
     useEffect(() => {
         if (typeof window !== 'undefined' && messages.length > 1) {
             localStorage.setItem('chat-messages', JSON.stringify(messages));
-            // Also store systemMessageSent state
-            localStorage.setItem('system-message-sent', JSON.stringify(systemMessageSent));
         }
-    }, [messages, systemMessageSent]);
+    }, [messages]);
 
     // Load conversation from localStorage
     useEffect(() => {
         if (typeof window !== 'undefined' && isOpen) {
             const savedMessages = localStorage.getItem('chat-messages');
-            const savedSystemState = localStorage.getItem('system-message-sent');
 
             if (savedMessages) {
                 try {
@@ -86,34 +82,79 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
                     console.error('Error parsing saved messages', e);
                 }
             }
-
-            if (savedSystemState) {
-                try {
-                    setSystemMessageSent(JSON.parse(savedSystemState));
-                } catch (e) {
-                    console.error('Error parsing system message state', e);
-                }
-            }
         }
     }, [isOpen]);
 
-    // Parse links and make them clickable
-    const renderMessageContent = (content: string): React.ReactNode => {
-        // Check if content contains keywords related to contact/WhatsApp and insert WhatsApp button
-        const contactKeywords = [
-            'hubungi', 'kontak', 'whatsapp', 'wa', 'chat', 'tanya', 'menghubungi',
-            'contact', 'reach', 'message', 'connect'
-        ];
+    // Generate personal info system message
+    const getPersonalInfoMessage = () => {
+        return `
+You are an AI assistant that acts like Defano Arya Wardhana himself. You should speak in first person as if you are Defano.
 
-        // Check if the message is from the assistant and contains contact keywords
-        if (contactKeywords.some(keyword =>
-            content.toLowerCase().includes(keyword.toLowerCase())) &&
-            !content.includes('wa.me/')) {
+My personal information:
+Name: ${personalInfo.name}
+Title: ${personalInfo.title}
+TaglineId: ${personalInfo.taglineId}
+Location: ${personalInfo.location}
+Email: ${personalInfo.email}
+Phone: ${personalInfo.phone}
+Bio (English): ${personalInfo.bio.join(' ')}
+Bio (Indonesia): ${personalInfo.bioId}
+GitHub: ${personalInfo.github}
+LinkedIn: ${personalInfo.linkedin}
+WhatsApp: ${personalInfo.wa}
 
-            // Add WhatsApp button for messages containing contact keywords
+Programming Skills: ${personalInfo.skillCategories.programming.map(skill => skill.name).join(', ')}
+Networking Skills: ${personalInfo.skillCategories.networking.join(', ')}
+Deployment Skills: ${personalInfo.skillCategories.deployment.join(', ')}
+Office Skills: ${personalInfo.skillCategories.office.join(', ')}
+Other Skills: ${personalInfo.skillCategories.other.join(', ')}
+Languages: ${personalInfo.languages.join(', ')}
+
+INSTRUCTIONS:
+1. Act as if you ARE defano's close friend, and use informal language or slang
+2. Please provide a short and concise answer about Defano based on the information above (which I sent)
+3. ALWAYS promote WhatsApp as your primary contact method when asked how to get in touch
+4. Whenever someone asks how to contact you, share your WhatsApp number (6281219147116)
+5. Keep responses under 3 sentences when possible
+6. Use a casual, conversational tone with some Indonesian slang words (like "sih", "dong", "nih", etc.)
+7. Don't use Markdown formatting with asterisks (*) as it won't render properly
+8. Don't mention that you are an AI - respond as Defano himself would
+`;
+    };
+
+    // Function to open WhatsApp
+    const openWhatsApp = () => {
+        const message = 'Halo, saya tertarik untuk tahu lebih lanjut tentang Anda.';
+        window.open(`${personalInfo.wa}?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    // Parse links and render message content
+    const renderMessageContent = (content: string, isAssistantMessage: boolean): React.ReactNode => {
+        // Fix asterisks in AI response - convert markdown-style formatting to proper HTML
+        let processedContent = content;
+
+        // Only process markdown for assistant messages
+        if (isAssistantMessage) {
+            // Replace markdown bold/italic with HTML tags
+            processedContent = processedContent
+                .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') // Bold and italic
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic
+        }
+
+        // Add WhatsApp button for assistant messages containing contact-related content
+        // The AI will naturally mention WhatsApp contact info based on system prompt
+        if (isAssistantMessage &&
+            (processedContent.toLowerCase().includes('whatsapp') ||
+                processedContent.toLowerCase().includes('wa.me') ||
+                processedContent.toLowerCase().includes(personalInfo.phone) ||
+                processedContent.toLowerCase().includes('6281219147116') ||
+                processedContent.toLowerCase().includes('hubungi') ||
+                processedContent.toLowerCase().includes('kontak'))) {
+
             return (
                 <>
-                    {content}
+                    <div dangerouslySetInnerHTML={{ __html: processedContent }} />
                     <div className="mt-2">
                         <button
                             onClick={openWhatsApp}
@@ -134,7 +175,6 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
             // Match URLs, emails, and WhatsApp links
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
-
 
             // Function to process matches with a regex
             const processMatches = (regex: RegExp, text: string, type: string) => {
@@ -193,25 +233,26 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
             return finalResult;
         };
 
-        // Process the content
-        const processed = processLinks(content);
+        // For assistant messages with markdown, use dangerouslySetInnerHTML
+        if (isAssistantMessage &&
+            (processedContent.includes('<strong>') ||
+                processedContent.includes('<em>'))) {
+            return <div dangerouslySetInnerHTML={{ __html: processedContent }} />;
+        }
+
+        // Process the content for links
+        const processed = processLinks(processedContent);
 
         // If there were no matches, just return the original text
         if (processed.length === 1 && typeof processed[0] === 'string') {
-            return content;
+            return processedContent;
         }
 
         return <>{processed}</>;
     };
 
-    // Function to handle WhatsApp links correctly
-    const openWhatsApp = () => {
-        const message = 'Halo, saya tertarik untuk tahu lebih lanjut tentang Anda.';
-        window.open(`https://wa.me/6281219147116?text=${encodeURIComponent(message)}`, '_blank');
-    };
-
     const handleSendMessage = async (): Promise<void> => {
-        if (!input.trim()) return;
+        if (!input.trim() || isLoading) return; // Tambahkan pengecekan isLoading
 
         // Add user message to chat
         const newUserMessage: Message = {
@@ -225,47 +266,24 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
         setIsLoading(true);
 
         try {
-            // Personal info system message (only once)
-            const personalInfoText = `
-Information about Defano Arya Wardhana:
-Name: ${personalInfo.name}
-Title: ${personalInfo.title}
-Location: ${personalInfo.location}
-Bio: ${personalInfo.bio.join(' ')}
-Skills: ${personalInfo.skills.join(', ')}
-Languages: ${personalInfo.languages.join(', ')}
-GitHub: ${personalInfo.github}
-LinkedIn: ${personalInfo.linkedin}
-
-INSTRUCTIONS:
-1. Give brief, concise answers about Defano based on the information above
-2. When asked about how to contact Defano, ALWAYS recommend WhatsApp as the primary contact method
-3. When users ask questions like "how can I contact you?" or "how to reach Defano", respond with something like "Cara terbaik untuk menghubungi Defano adalah melalui WhatsApp di nomor 6281219147116"
-4. Keep responses under 3 sentences when possible
-5. Don't mention any limitations in your responses
-6. Format responses in a conversational, friendly tone
-`;
+            // Get personal info system message
+            const personalInfoText = getPersonalInfoMessage();
 
             // Prepare API messages
-            let apiMessages: { role: string; content: string }[] = [];
-
-            if (!systemMessageSent) {
-                apiMessages.push({
+            let apiMessages = [
+                {
                     role: 'system',
-                    content: personalInfoText,
-                });
-                setSystemMessageSent(true);
-            }
-
-            apiMessages = [
-                ...apiMessages,
+                    content: personalInfoText
+                },
                 ...updatedMessages.map((msg) => ({
                     role: msg.role === 'system' ? 'assistant' : msg.role,
                     content: msg.content,
-                })),
+                }))
             ];
 
-            // Call OpenRouter API with streaming enabled
+            // Tambahkan delay minimal 1 detik antara permintaan
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -275,13 +293,18 @@ INSTRUCTIONS:
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'deepseek/deepseek-chat-v3:free',
+                    model: 'meta-llama/llama-3.3-8b-instruct:free',
                     stream: true,
                     messages: apiMessages,
                 }),
             });
 
             if (!response.ok) {
+                if (response.status === 429) {
+                    // Jika masih dapat 429, tambahkan delay lebih panjang
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    throw new Error('Terlalu banyak permintaan. Silakan coba lagi nanti.');
+                }
                 throw new Error(`API error: ${response.status}`);
             }
 
@@ -299,7 +322,7 @@ INSTRUCTIONS:
                 done = doneReading;
                 if (value) {
                     const chunk = decoder.decode(value, { stream: true });
-                    // Split chunk by newlines (streamed data dipisah "\n")
+                    // Split chunk by newlines
                     const lines = chunk.split('\n');
 
                     for (const line of lines) {
@@ -310,14 +333,14 @@ INSTRUCTIONS:
                             break;
                         }
                         if (trimmed.startsWith('data: ')) {
-                            const jsonStr = trimmed.substring(6); // buang prefix "data: "
+                            const jsonStr = trimmed.substring(6); // remove "data: " prefix
                             try {
                                 const parsed = JSON.parse(jsonStr);
                                 const delta = parsed.choices?.[0]?.delta;
                                 if (delta && delta.content) {
                                     aiResponse += delta.content;
 
-                                    // Update state tiap dapat konten baru (partial streaming)
+                                    // Update state with each new content chunk (partial streaming)
                                     setMessages(prev => {
                                         const filtered = prev.filter(m => m.role !== 'assistant');
                                         return [
@@ -363,13 +386,11 @@ INSTRUCTIONS:
     // Function to clear chat history
     const clearChat = () => {
         localStorage.removeItem('chat-messages');
-        localStorage.removeItem('system-message-sent');
         setMessages([{
             role: 'system',
             content: 'Hai! Saya siap membantu Anda. Apa yang ingin Anda tanyakan kepada Defano?',
             timestamp: new Date()
         }]);
-        setSystemMessageSent(false);
     };
 
     return (
@@ -436,7 +457,7 @@ INSTRUCTIONS:
                             ? 'bg-gray-700 text-gray-100'
                             : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
                             }`}>
-                            {renderMessageContent(msg.content)}
+                            {renderMessageContent(msg.content, msg.role === 'assistant')}
                         </div>
                         <span className="text-xs text-gray-500 mt-1 px-1">
                             {formatTime(msg.timestamp)}
