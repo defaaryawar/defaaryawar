@@ -5,7 +5,7 @@ export const personalInfo = {
     titleId: "Pengembang FullStack | TI | Pengembang Frontend",
     tagline: "Coding yes, checking the network also works!",
     taglineId: "Ngoding iya, ngoprek jaringan juga jalan!",
-    avatar: "/src/assets/profil/profil_defano.webp", // Replace with actual image path
+    avatar: "/assets/profil/profil_defano.webp", // Replace with actual image path
     email: "defadefa1313@gmail.com",
     phone: "081219147116",
     location: "Tangerang Selatan, IDN",
