@@ -5,7 +5,7 @@ export const personalInfo = {
     titleId: "Pengembang FullStack | TI | Pengembang Frontend",
     tagline: "Coding yes, checking the network also works!",
     taglineId: "Ngoding iya, ngoprek jaringan juga jalan!",
-    avatar: "/assets/profil/profil_defano.webp", // Replace with actual image path
+    avatar: "assets/profil/profil_defano.webp", // Replace with actual image path
     email: "defadefa1313@gmail.com",
     phone: "081219147116",
     location: "Tangerang Selatan, IDN",
@@ -22,16 +22,16 @@ export const personalInfo = {
     // Skills categorized with logos for programming skills
     skillCategories: {
         programming: [
-            { name: "React", logo: "/src/assets/skills/react.png" },
-            { name: "TypeScript", logo: "/src/assets/skills/typescript.png" },
-            { name: "Next.js", logo: "/src/assets/skills/nextjs.png" },
-            { name: "Node.js", logo: "/src/assets/skills/nodejs.png" },
-            { name: "HTML5", logo: "/src/assets/skills/html.png" },
-            { name: "CSS", logo: "/src/assets/skills/css.png" },
-            { name: "JavaScript", logo: "/src/assets/skills/javascript.png" },
-            { name: "TailwindCSS", logo: "/src/assets/skills/tailwindcss.png" },
-            { name: "PostgreSQL", logo: "/src/assets/skills/postgresql.png" },
-            { name: "Firebase", logo: "/src/assets/skills/firebase.png" },
+            { name: "React", logo: "/assets/skills/react.png" },
+            { name: "TypeScript", logo: "/assets/skills/typescript.png" },
+            { name: "Next.js", logo: "/assets/skills/nextjs.png" },
+            { name: "Node.js", logo: "/assets/skills/nodejs.png" },
+            { name: "HTML5", logo: "/assets/skills/html.png" },
+            { name: "CSS", logo: "/assets/skills/css.png" },
+            { name: "JavaScript", logo: "/assets/skills/javascript.png" },
+            { name: "TailwindCSS", logo: "/assets/skills/tailwindcss.png" },
+            { name: "PostgreSQL", logo: "/assets/skills/postgresql.png" },
+            { name: "Firebase", logo: "/assets/skills/firebase.png" },
         ],
         networking: [
             "LAN Configuration",
@@ -88,7 +88,7 @@ export const educationData = [
             "Fokus pada pengembangan web dan keamanan siber. Mempelajari bahasa pemrograman dan framework seperti HTML, CSS, JavaScript, PHP, React, dan lainnya.",
         field: "Informatics Engineering",
         fieldId: "Teknik Informatika",
-        logo: "/src/assets/logo_edu/budi_luhur.webp"
+        logo: "/assets/logo_edu/budi_luhur.webp"
     },
     {
         id: 2,
@@ -104,7 +104,7 @@ export const educationData = [
             "Mempelajari jaringan komputer, konfigurasi LAN, troubleshooting, dan dasar-dasar server. Praktik langsung menggunakan Cisco, Debian, dan VirtualBox.",
         field: "Computer and Network Engineering",
         fieldId: "Teknik Komputer dan Jaringan",
-        logo: "/src/assets/logo_edu/bina_informatika.webp"
+        logo: "/assets/logo_edu/bina_informatika.webp"
     }
 ];
 
@@ -207,7 +207,7 @@ export const projects = [
         titleId: "Deflix - Aplikasi Trailer Film",
         description: "A Netflix-like UI for browsing and watching trailers using TMDB API, built for learning with Next.js, NestJS, PostgreSQL, and Docker.",
         descriptionId: "Tampilan mirip Netflix untuk menjelajah dan menonton trailer menggunakan API TMDB, dibuat untuk keperluan belajar dengan Next.js, NestJS, PostgreSQL, dan Docker.",
-        image: "/src/assets/projects/deflix.webp",
+        image: "/assets/projects/deflix.webp",
         technologies: ["Next.js", "NestJS", "PostgreSQL", "TMDB API", "Redux", "Docker"],
         demoLink: "https://deflix-three.vercel.app/",
         githubLink: "https://github.com/defaaryawar/deflix-frontend"
@@ -217,7 +217,7 @@ export const projects = [
         titleId: "AnimeList - Aplikasi Penjelajah Anime",
         description: "Simple anime listing app using public anime APIs with a modern interface built using Next.js, Tailwind CSS, DaisyUI, and TypeScript.",
         descriptionId: "Aplikasi daftar anime sederhana dengan antarmuka modern, dibangun menggunakan Next.js, Tailwind CSS, DaisyUI, dan TypeScript dengan integrasi API publik anime.",
-        image: "/src/assets/projects/animelist.webp",
+        image: "/assets/projects/animelist.webp",
         technologies: ["Next.js", "React", "Tailwind CSS", "DaisyUI", "TypeScript", "Anime API"],
         demoLink: "https://def-anime.vercel.app/",
         githubLink: "https://github.com/defaaryawar/def-anime"
@@ -227,7 +227,7 @@ export const projects = [
         titleId: "Jaya Mandiri - Dashboard Admin",
         description: "A modern and responsive admin dashboard for managing deliveries at Jaya Mandiri, built with React (Vite) frontend and NestJS backend, featuring PostgreSQL and unit testing with Jest.",
         descriptionId: "Dashboard admin yang modern dan responsif untuk mengelola pengiriman di Jaya Mandiri, dibangun dengan frontend React (Vite) dan backend NestJS, menggunakan PostgreSQL dan pengujian unit dengan Jest.",
-        image: "/src/assets/projects/admin-jm.webp",
+        image: "/assets/projects/admin-jm.webp",
         technologies: ["React", "Vite", "NestJS", "PostgreSQL", "Jest", "Hooks"],
         githubLink: "https://github.com/defaaryawar/dashboard-jaya-mandiri"
     },
@@ -236,7 +236,7 @@ export const projects = [
         titleId: "Jaya Mandiri - Profil Perusahaan",
         description: "A clean and responsive company profile website for Jaya Mandiri, built using React, TailwindCSS, and Shadcn UI with smooth layout and modular components.",
         descriptionId: "Website profil perusahaan yang bersih dan responsif untuk Jaya Mandiri, dibangun dengan React, TailwindCSS, dan Shadcn UI menggunakan komponen modular dan tampilan modern.",
-        image: "/src/assets/projects/jayamandiri.webp",
+        image: "/assets/projects/jayamandiri.webp",
         technologies: ["React", "Tailwind CSS", "Shadcn UI"],
         demoLink: "https://jaya-mandiri.vercel.app/",
         githubLink: "https://github.com/defaaryawar/jaya-mandiri"
@@ -246,7 +246,7 @@ export const projects = [
         titleId: "Nion Coffee - Profil Perusahaan",
         description: "A fully-featured and scalable company profile app for Nion Coffee, leveraging React with Vite, TailwindCSS, DaisyUI, REST API, and solid architecture using OOP and Redux. One of the most complete and polished projects.",
         descriptionId: "Aplikasi profil perusahaan yang kaya fitur dan scalable untuk Nion Coffee, menggunakan React dengan Vite, TailwindCSS, DaisyUI, REST API, serta arsitektur solid dengan pendekatan OOP dan manajemen state menggunakan Redux. Salah satu proyek paling lengkap dan matang.",
-        image: "/src/assets/projects/nion.webp",
+        image: "/assets/projects/nion.webp",
         technologies: ["React", "Vite", "Tailwind CSS", "DaisyUI", "REST API", "OOP", "Redux"],
         demoLink: "https://nioncoffee.store/",
         githubLink: "https://github.com/defaaryawar/nion-coffee"
@@ -256,7 +256,7 @@ export const projects = [
         titleId: "TodoList App - Alat Produktivitas",
         description: "A simple yet powerful TodoList application with full CRUD capabilities, built using React and TailwindCSS on the frontend, and Python backend with PostgreSQL. Includes clean and comprehensive documentation for easy understanding and scalability.",
         descriptionId: "Aplikasi TodoList yang sederhana namun powerful dengan kemampuan CRUD penuh, dibangun menggunakan React dan TailwindCSS di frontend, serta backend Python dengan PostgreSQL. Didukung dokumentasi lengkap dan rapi untuk kemudahan pengembangan dan skalabilitas.",
-        image: "/src/assets/projects/todo.webp",
+        image: "/assets/projects/todo.webp",
         technologies: ["React", "Tailwind CSS", "Python (Flask/FastAPI)", "PostgreSQL", "CRUD", "Documentation"],
         githubLink: "https://github.com/defaaryawar/Todo-app-list"
     }
