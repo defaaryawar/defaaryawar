@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLanguage } from '../hooks/LanguageContext';
 import { FaWhatsapp, FaEnvelope, FaInstagram, FaLinkedin, FaMapMarkerAlt } from 'react-icons/fa';
 import type { ReactNode } from 'react';

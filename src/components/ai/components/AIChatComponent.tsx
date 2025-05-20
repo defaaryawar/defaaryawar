@@ -134,10 +134,7 @@ const AIChatComponent: React.FC<AIChatComponentProps> = ({ isOpen, onClose }) =>
             // Match URLs, emails, and WhatsApp links
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
-            const waRegex = /(https:\/\/wa\.me\/[0-9]+)/g;
             
-            let parts = [];
-            let lastIndex = 0;
             
             // Function to process matches with a regex
             const processMatches = (regex: RegExp, text: string, type: string) => {

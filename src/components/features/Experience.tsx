@@ -1,7 +1,7 @@
 import React from 'react';
 import { experience } from '../constants/portfolioData';
 import { useLanguage } from '../hooks/LanguageContext';
-import { FaBriefcase, FaCalendarAlt, FaMapMarkerAlt, FaTrophy } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaTrophy } from 'react-icons/fa';
 
 const Experience: React.FC = () => {
     const { language } = useLanguage();
