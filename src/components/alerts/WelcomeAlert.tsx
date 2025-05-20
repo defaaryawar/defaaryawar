@@ -12,9 +12,9 @@ const WelcomeAlert: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) => {
     useEffect(() => {
         const lastShown = localStorage.getItem(STORAGE_KEY);
         const now = new Date().getTime();
-        const FOUR_HOURS = 4 * 60 * 60 * 1000;
+        const ONE_HOURS = 1 * 60 * 60 * 1000;
 
-        if (!lastShown || now - parseInt(lastShown) > FOUR_HOURS) {
+        if (!lastShown || now - parseInt(lastShown) > ONE_HOURS) {
             setVisible(true);
             localStorage.setItem(STORAGE_KEY, now.toString());
 
@@ -38,7 +38,7 @@ const WelcomeAlert: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode }) => {
         setIsClosing(true);
         setTimeout(() => {
             setVisible(false);
-        }, 400); // Match the duration of the exit animation
+        }, 100); // Match the duration of the exit animation
     };
 
     if (!visible) return null;
