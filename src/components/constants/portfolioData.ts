@@ -112,6 +112,30 @@ export const educationData = [
 export const experience = [
     {
         id: 1,
+        title: "Frontend Web Developer",
+        titleId: "Pengembang Web Frontend",
+        company: "Zegen Solusi Mandiri",
+        location: "Tangerang, ID",
+        startDate: "06-2025",
+        endDate: "2025 (Present)",
+        endDateId: "2025 (Sekarang)",
+        description: "Developed a user-friendly, responsive front-end for the Rumah Murah BTN project, enhancing the online platform for property auction and purchase.",
+        descriptionId: "Mengembangkan frontend yang ramah pengguna dan responsif untuk proyek Rumah Murah BTN, meningkatkan platform lelang dan pembelian properti secara online.",
+        achievements: [
+            "Designed and implemented a dynamic user interface using React and Tailwind CSS",
+            "Integrated Single Sign-On (SSO) to streamline user authentication with BTN's banking system",
+            "Collaborated with backend developers to ensure real-time data integration from BTN's core banking system",
+            "Improved system architecture by transitioning to a cloud-native approach and microservices for scalability"
+        ],
+        achievementsId: [
+            "Mendesain dan mengimplementasikan antarmuka pengguna dinamis menggunakan React dan Tailwind CSS",
+            "Mengintegrasikan Single Sign-On (SSO) untuk mempermudah autentikasi pengguna dengan sistem perbankan BTN",
+            "Berkolaborasi dengan pengembang backend untuk memastikan integrasi data real-time dari sistem inti perbankan BTN",
+            "Meningkatkan arsitektur sistem dengan beralih ke pendekatan cloud-native dan microservices untuk skalabilitas"
+        ]
+    },
+    {
+        id: 2,
         title: "Freelance Fullstack Web Developer",
         titleId: "Pengembang Web Fullstack lepas",
         company: "Jaya Mandiri",
@@ -133,7 +157,7 @@ export const experience = [
         ]
     },
     {
-        id: 2,
+        id: 3,
         title: "Freelance Fullstack Web Developer",
         titleId: "Pengembang Web Fullstack lepas",
         company: "Nion Coffee",
@@ -155,7 +179,7 @@ export const experience = [
         ]
     },
     {
-        id: 3,
+        id: 4,
         title: "Freelance Fullstack Web Developer",
         titleId: "Pengembang Web Fullstack lepas",
         company: "Nion Coffee",
@@ -177,7 +201,7 @@ export const experience = [
         ]
     },
     {
-        id: 4,
+        id: 5,
         title: "IT Support Technician Intern",
         titleId: "Magang IT Support Technician",
         company: "Kementerian Pertanian Republik Indonesia",
@@ -197,7 +221,7 @@ export const experience = [
             "Membantu konfigurasi dan pemeliharaan jaringan LAN serta penataan kabel",
             "Memberikan dukungan kepada staf dalam pengaturan perangkat keras/perangkat lunak dan permasalahan teknis ringan"
         ]
-    }
+    },
 ];
 
 // projects.ts
