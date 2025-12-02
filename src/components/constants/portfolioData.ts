@@ -23,15 +23,29 @@ export const personalInfo = {
     skillCategories: {
         programming: [
             { name: "React", logo: "/assets/skills/react.png" },
-            { name: "TypeScript", logo: "/assets/skills/typescript.png" },
             { name: "Next.js", logo: "/assets/skills/nextjs.png" },
-            { name: "Node.js", logo: "/assets/skills/nodejs.png" },
-            { name: "HTML5", logo: "/assets/skills/html.png" },
-            { name: "CSS", logo: "/assets/skills/css.png" },
+            { name: "React + Vite", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Vitejs-logo.svg/250px-Vitejs-logo.svg.png" },
+            { name: "TypeScript", logo: "/assets/skills/typescript.png" },
             { name: "JavaScript", logo: "/assets/skills/javascript.png" },
-            { name: "TailwindCSS", logo: "/assets/skills/tailwindcss.png" },
-            { name: "PostgreSQL", logo: "/assets/skills/postgresql.png" },
+            { name: "Node.js", logo: "/assets/skills/nodejs.png" },
+            { name: "Golang", logo: "https://miro.medium.com/1*vmFSpk9xtpxAHkH7cmt-3Q.png" },
+
+            // UI / Styling
+            { name: "TailwindCSS", logo: "https://codekitapp.com/images/help/free-tailwind-icon@2x.png" },
+            { name: "HTML5", logo: "/assets/skills/html.png" },
+            { name: "CSS", logo: "/assets/skills/css.png" }
+        ],
+        backendTools: [
+            { name: "NestJS", logo: "/assets/skills/nestjs.png" },
+            { name: "Redis", logo: "https://cdn.clever-cloud.com/uploads/2023/08/redis-color.png" },
+            { name: "RabbitMQ", logo: "https://a.storyblok.com/f/153547/2400x2540/24777f0edc/rabbitmq-logo_best-for-rabbitmq-blog.png" },
+            { name: "Docker", logo: "https://www.stackhero.io/assets/src/images/servicesLogos/openGraphVersions/docker.png?d87f4381" }
+        ],
+        databaseAndCloud: [
+            { name: "PostgreSQL", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1163px-Postgresql_elephant.svg.png" },
+            { name: "Supabase", logo: "https://img.icons8.com/color/512/supabase.png" },
             { name: "Firebase", logo: "/assets/skills/firebase.png" },
+            { name: "Cloudinary", logo: "https://icon2.cleanpng.com/20180426/eew/kisspng-cloudinary-computer-software-software-as-a-service-5ae2211140a7b5.8325155915247690412649.jpg" }
         ],
         networking: [
             "LAN Configuration",
@@ -68,7 +82,6 @@ export const personalInfo = {
         "LAN Configuration", "Network Troubleshooting", "Microsoft Excel",
         "Basic Linux Commands", "Vercel", "Railway", "Hostinger"
     ],
-
     languages: ["English (Fluent)", "Indonesian (Native)"]
 };
 
@@ -117,21 +130,21 @@ export const experience = [
         company: "Zegen Solusi Mandiri",
         location: "Tangerang, ID",
         startDate: "06-2025",
-        endDate: "2025 (Present)",
-        endDateId: "2025 (Sekarang)",
-        description: "Developed a user-friendly, responsive front-end for the Rumah Murah BTN project, enhancing the online platform for property auction and purchase.",
-        descriptionId: "Mengembangkan frontend yang ramah pengguna dan responsif untuk proyek Rumah Murah BTN, meningkatkan platform lelang dan pembelian properti secara online.",
+        endDate: "Present",
+        endDateId: "Sekarang",
+        description: "Frontend developer for the Rumah Murah / Bale Lelang project by BTN, focusing on the SSO system, internal admin panel, and external user interface.",
+        descriptionId: "Frontend developer untuk proyek Rumah Murah / Bale Lelang milik BTN, dengan fokus pada sistem SSO, panel admin internal, serta antarmuka pengguna eksternal.",
         achievements: [
-            "Designed and implemented a dynamic user interface using React and Tailwind CSS",
-            "Integrated Single Sign-On (SSO) to streamline user authentication with BTN's banking system",
-            "Collaborated with backend developers to ensure real-time data integration from BTN's core banking system",
-            "Improved system architecture by transitioning to a cloud-native approach and microservices for scalability"
+            "Implemented the Single Sign-On (SSO) flow used across Rumah Murah / Bale Lelang",
+            "Developed the internal admin panel for managing property, auction, and verification data",
+            "Built responsive and optimized UI components for the external user-facing pages",
+            "Collaborated with the backend and product team to align data flow and improve overall UX"
         ],
         achievementsId: [
-            "Mendesain dan mengimplementasikan antarmuka pengguna dinamis menggunakan React dan Tailwind CSS",
-            "Mengintegrasikan Single Sign-On (SSO) untuk mempermudah autentikasi pengguna dengan sistem perbankan BTN",
-            "Berkolaborasi dengan pengembang backend untuk memastikan integrasi data real-time dari sistem inti perbankan BTN",
-            "Meningkatkan arsitektur sistem dengan beralih ke pendekatan cloud-native dan microservices untuk skalabilitas"
+            "Mengimplementasikan alur Single Sign-On (SSO) yang digunakan di Rumah Murah / Bale Lelang",
+            "Mengembangkan panel admin internal untuk mengelola data properti, lelang, dan verifikasi",
+            "Membangun komponen antarmuka responsif dan optimal untuk halaman eksternal",
+            "Berkolaborasi dengan tim backend dan product untuk menyelaraskan alur data dan meningkatkan UX"
         ]
     },
     {
@@ -227,6 +240,29 @@ export const experience = [
 // projects.ts
 export const projects = [
     {
+        title: "SoftShop - Mini Ecommerce System",
+        titleId: "SoftShop - Sistem Ecommerce Mini",
+        description: "A full-featured ecommerce system built with a multi-service monolithic architecture. Responsible for building 3 backend services and 3 frontend applications, including external user features, internal admin panel, and courier system with real-time tracking.",
+        descriptionId: "Sistem ecommerce lengkap dengan arsitektur monolitik multi-layanan. Bertanggung jawab membangun 3 layanan backend dan 3 aplikasi frontend, termasuk fitur pengguna eksternal, panel admin internal, serta sistem kurir dengan pelacakan real-time.",
+        image: "https://img.freepik.com/free-vector/torn-style-coming-soon-promo-template-social-media-post_1017-55783.jpg?semt=ais_hybrid&w=740&q=80",
+        technologies: [
+            "Golang",
+            "NestJS",
+            "Next.js",
+            "React (Vite)",
+            "Tailwind CSS",
+            "Supabase",
+            "PostgreSQL",
+            "WebSocket",
+            "RabbitMQ",
+            "Redis",
+            "Cloudinary",
+            "SSE"
+        ],
+        demoLink: "",
+        githubLink: ""
+    },
+    {
         title: "Deflix - Movie Trailer App",
         titleId: "Deflix - Aplikasi Trailer Film",
         description: "A Netflix-like UI for browsing and watching trailers using TMDB API, built for learning with Next.js, NestJS, PostgreSQL, and Docker.",
@@ -283,7 +319,7 @@ export const projects = [
         image: "/assets/projects/todo.webp",
         technologies: ["React", "Tailwind CSS", "Python (Flask/FastAPI)", "PostgreSQL", "CRUD", "Documentation"],
         githubLink: "https://github.com/defaaryawar/Todo-app-list"
-    }
+    },
 ];
 
 // certificates.ts
@@ -314,7 +350,7 @@ export const certificatesData = [
         description: "Certification covering the fundamentals of HTML, including semantic structure, forms, multimedia, and accessibility in frontend development.",
         descriptionId: "Sertifikasi yang mencakup dasar-dasar HTML, termasuk struktur semantik, formulir, multimedia, dan aksesibilitas dalam pengembangan frontend.",
         skills: ["HTML5", "Semantic HTML", "Web Accessibility", "Frontend Development"],
-        logo: "https://yt3.googleusercontent.com/wFVwjKnPGXQbgBFrD_L7DrJN5YDaGBn20GLRYR9OlD1JGwXo9YSez8RHg3Yj2B8U9KzoVPQo=s900-c-k-c0x00ffffff-no-rj"
+        logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ50JWhyL_6EPXYH3Cw16x0JAI7IlmposX74Q&s"
     },
     {
         id: 3,
@@ -328,7 +364,7 @@ export const certificatesData = [
         description: "Certificate program focused on fund analysis, financial planning, and fund allocation strategies.",
         descriptionId: "Program sertifikasi yang berfokus pada analisis dana, perencanaan keuangan, dan strategi alokasi dana.",
         skills: ["Fund Analysis", "Financial Planning", "Budget Allocation"],
-        logo: "https://yt3.googleusercontent.com/wFVwjKnPGXQbgBFrD_L7DrJN5YDaGBn20GLRYR9OlD1JGwXo9YSez8RHg3Yj2B8U9KzoVPQo=s900-c-k-c0x00ffffff-no-rj"
+        logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ50JWhyL_6EPXYH3Cw16x0JAI7IlmposX74Q&s"
     },
     {
         id: 4,
@@ -384,7 +420,7 @@ export const certificatesData = [
         description: "Fundamental program for aspiring data analysts covering data types, analysis techniques, and visualization.",
         descriptionId: "Program dasar untuk calon analis data mencakup tipe data, teknik analisis, dan visualisasi.",
         skills: ["Data Fundamentals", "Data Visualization", "Analytical Thinking"],
-        logo: "https://yt3.googleusercontent.com/wFVwjKnPGXQbgBFrD_L7DrJN5YDaGBn20GLRYR9OlD1JGwXo9YSez8RHg3Yj2B8U9KzoVPQo=s900-c-k-c0x00ffffff-no-rj"
+        logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ50JWhyL_6EPXYH3Cw16x0JAI7IlmposX74Q&s"
     },
 ];
 
