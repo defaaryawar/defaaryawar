@@ -9,7 +9,168 @@ import {
   FaTimes,
   FaExpand,
   FaClock,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
+
+// ProjectCard Component to handle individual project state (slides)
+const ProjectCard = ({ project, language, translations, handleImageClick }: any) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlide((prev) => (prev === project.images.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevSlide = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlide((prev) => (prev === 0 ? project.images.length - 1 : prev - 1));
+  };
+
+  const goToSlide = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlide(index);
+  };
+
+  return (
+    <div className="rounded-lg bg-white dark:bg-gray-800/90 shadow-md hover:shadow-lg border border-gray-100 dark:border-gray-700 transition-all duration-300 flex flex-col h-full overflow-hidden group">
+      {/* Project Image Container with Aspect Ratio */}
+      <div className="relative pt-[56.25%] bg-gray-100 dark:bg-gray-900">
+        {/* 16:9 Aspect Ratio */}
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src={project.images[currentSlide]}
+            alt={language === "en" ? project.title : project.titleId}
+            className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+          />
+
+          {/* Expand Image Button - Fixed with larger hit area and higher z-index */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent event bubbling
+              handleImageClick(project.images[currentSlide]);
+            }}
+            className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors z-20"
+            title={translations.clickToExpand}
+            aria-label={translations.clickToExpand}
+          >
+            <FaExpand size={14} />
+          </button>
+
+          {/* Carousel Navigation - Only if more than 1 image */}
+          {project.images.length > 1 && (
+            <>
+              {/* Previous Button - Visible on hover (desktop) */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hidden sm:block"
+                aria-label="Previous slide"
+              >
+                <FaChevronLeft size={16} />
+              </button>
+
+              {/* Next Button - Visible on hover (desktop) */}
+              <button
+                onClick={nextSlide}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hidden sm:block"
+                aria-label="Next slide"
+              >
+                <FaChevronRight size={16} />
+              </button>
+
+              {/* Dots Indicator */}
+              <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-1.5 z-20 pointer-events-none">
+                {project.images.map((_: string, index: number) => (
+                  <div
+                    key={index}
+                    onClick={(e) => goToSlide(index, e)}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                      currentSlide === index
+                        ? "bg-white w-4" // Active dot is wider
+                        : "bg-white/50 hover:bg-white/80"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Permanent Gradient Overlay - Reduced opacity and z-index */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 z-10 pointer-events-none"></div>
+
+          {/* Project Title on Image */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 z-10 pointer-events-none">
+            <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-lg">
+              {language === "en" ? project.title : project.titleId}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      {/* Project Info */}
+      <div className="p-3 sm:p-4 flex-grow flex flex-col">
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow leading-relaxed">
+          {language === "en" ? project.description : project.descriptionId}
+        </p>
+
+        {/* Technologies */}
+        <div className="mb-3">
+          <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center">
+            <FaLayerGroup className="mr-1" size={10} />
+            {translations.tech}
+          </h4>
+          <div className="flex flex-wrap gap-1">
+            {project.technologies.map((tech: string) => (
+              <span
+                key={tech}
+                className="inline-block bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-2 py-0.5 rounded-full text-xs font-medium text-blue-700 dark:text-blue-300"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Project Links */}
+        <div className="flex gap-2 mt-auto">
+          {project.demoLink ? (
+            <a
+              href={project.demoLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 text-center py-1.5 px-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs sm:text-sm rounded-md transition-all duration-300 flex items-center justify-center"
+            >
+              <FaExternalLinkAlt className="mr-1" size={10} />
+              {translations.demo}
+            </a>
+          ) : (
+            <div className="flex-1 text-center py-1.5 px-2 bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs sm:text-sm rounded-md flex items-center justify-center cursor-not-allowed">
+              <FaClock className="mr-1" size={10} />
+              {translations.comingSoon}
+            </div>
+          )}
+
+          {project.githubLink ? (
+            <a
+              href={project.githubLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 text-center py-1.5 px-2 bg-gray-100 dark:bg-gray-700/80 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs sm:text-sm rounded-md transition-colors duration-300 flex items-center justify-center"
+            >
+              <FaGithub className="mr-1" size={10} />
+              {translations.sourceCode}
+            </a>
+          ) : (
+            <div className="flex-1 text-center py-1.5 px-2 bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs sm:text-sm rounded-md flex items-center justify-center cursor-not-allowed">
+              <FaClock className="mr-1" size={10} />
+              {translations.comingSoon}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Projects = () => {
   const { language } = useLanguage();
@@ -49,108 +210,13 @@ const Projects = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         {projects.map((project) => (
-          <div
+          <ProjectCard
             key={project.title}
-            className="rounded-lg bg-white dark:bg-gray-800/90 shadow-md hover:shadow-lg border border-gray-100 dark:border-gray-700 transition-all duration-300 flex flex-col h-full overflow-hidden"
-          >
-            {/* Project Image Container with Aspect Ratio */}
-            <div className="relative pt-[56.25%]">
-              {" "}
-              {/* 16:9 Aspect Ratio */}
-              <div className="absolute inset-0 overflow-hidden">
-                <img
-                  src={project.image}
-                  alt={language === "en" ? project.title : project.titleId}
-                  className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
-                />
-
-                {/* Expand Image Button - Fixed with larger hit area and higher z-index */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent event bubbling
-                    handleImageClick(project.image);
-                  }}
-                  className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors z-20"
-                  title={translations.clickToExpand}
-                  aria-label={translations.clickToExpand}
-                >
-                  <FaExpand size={14} />
-                </button>
-
-                {/* Permanent Gradient Overlay - Reduced opacity and z-index */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 z-10"></div>
-
-                {/* Project Title on Image */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                  <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-lg">
-                    {language === "en" ? project.title : project.titleId}
-                  </h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Project Info */}
-            <div className="p-3 sm:p-4 flex-grow flex flex-col">
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow leading-relaxed">
-                {language === "en" ? project.description : project.descriptionId}
-              </p>
-
-              {/* Technologies */}
-              <div className="mb-3">
-                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center">
-                  <FaLayerGroup className="mr-1" size={10} />
-                  {translations.tech}
-                </h4>
-                <div className="flex flex-wrap gap-1">
-                  {project.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="inline-block bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-2 py-0.5 rounded-full text-xs font-medium text-blue-700 dark:text-blue-300"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Project Links */}
-              <div className="flex gap-2 mt-auto">
-                {project.demoLink ? (
-                  <a
-                    href={project.demoLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 text-center py-1.5 px-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs sm:text-sm rounded-md transition-all duration-300 flex items-center justify-center"
-                  >
-                    <FaExternalLinkAlt className="mr-1" size={10} />
-                    {translations.demo}
-                  </a>
-                ) : (
-                  <div className="flex-1 text-center py-1.5 px-2 bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs sm:text-sm rounded-md flex items-center justify-center cursor-not-allowed">
-                    <FaClock className="mr-1" size={10} />
-                    {translations.comingSoon}
-                  </div>
-                )}
-
-                {project.githubLink ? (
-                  <a
-                    href={project.githubLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 text-center py-1.5 px-2 bg-gray-100 dark:bg-gray-700/80 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs sm:text-sm rounded-md transition-colors duration-300 flex items-center justify-center"
-                  >
-                    <FaGithub className="mr-1" size={10} />
-                    {translations.sourceCode}
-                  </a>
-                ) : (
-                  <div className="flex-1 text-center py-1.5 px-2 bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs sm:text-sm rounded-md flex items-center justify-center cursor-not-allowed">
-                    <FaClock className="mr-1" size={10} />
-                    {translations.comingSoon}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+            project={project}
+            language={language}
+            translations={translations}
+            handleImageClick={handleImageClick}
+          />
         ))}
       </div>
 
